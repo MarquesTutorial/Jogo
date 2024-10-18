@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quiz Intergalático de Reciclagem</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background: url('https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569_1280.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+          }
+          
+          h1 {
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+          }
+          
+          #game-container {
+          display: flex;
+          justify-content: center; /* Use "space-around" ou "space-evenly" para reduzir o espaçamento entre as lixeiras */
+          align-items: flex-end;
+          height: 60vh;
+          margin-top: 5px; /* Pode ajustar essa margem se quiser mais espaço superior */
+          flex-wrap: wrap;
+}
+
+      .trash-bin {
+          width: 200px; /* Reduza a largura para juntar mais as lixeiras */
+          height: 240px; /* Altura um pouco menor */
+          border: 3px solid white;
+          border-radius: 10px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          cursor: pointer;
+          transition: transform 0.3s;
+          margin: 25px; /* Reduz a margem entre as lixeiras */
+}
+
+          
+          .trash-bin:hover {
+            transform: scale(1.1);
+          }
+          
+          #blue { background-color: rgba(0, 0, 255, 0.8); }
+          #green { background-color: rgba(0, 255, 0, 0.8); }
+          #yellow { background-color: rgba(255, 255, 0, 0.8); }
+          #red { background-color: rgba(255, 0, 0, 0.8); }
+          #brown { background-color: rgba(165, 42, 42, 0.8); }
+          #orange { background-color: rgba(255, 165, 0, 0.8); }
+          #gray { background-color: rgba(128, 128, 128, 0.8); }
+          
+          #trash-item {
+            font-size: 15em;
+            cursor: grab;
+            user-select: none;
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+          }
+          
+          #score, #timer {
+            font-size: 2em;
+            margin-top: 50px;
+          }
+          
+          #message {
+            font-size: 2.2em;
+            height: 1.5em;
+            margin-top: 10px;
+          }
+          
+          #reset-btn {
+            font-size: 2.2em;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+          }
+          
+          #reset-btn:hover {
+            background-color: #45a049;
+          }
+ /* Responsividade */
+ @media (max-width: 768px) {
+        h1 {
+          font-size: 2em;
+        }
+
+        .trash-bin {
+          width: 180px;
+          height: 200px;
+        }
+
+        #trash-item {
+          font-size: 10em;
+          top: 30%;
+        }
+
+        #score, #timer {
+          font-size: 1.5em;
+        }
+
+        #reset-btn {
+          font-size: 1.8em;
+        }
+      }
+
+      @media (max-width: 480px) {
+        h1 {
+          font-size: 1.5em;
+        }
+
+        .trash-bin {
+          width: 140px;
+          height: 160px;
+        }
+
+        #trash-item {
+          font-size: 8em;
+          top: 25%;
+        }
+
+        #score, #timer {
+          font-size: 1.2em;
+        }
+
+        #reset-btn {
+          font-size: 1.5em;
+          padding: 8px 15px;
+        }
+      }
+
+        </style>
+        </head>
+        <body>
+          <h1>Quiz Intergalático de Reciclagem</h1>
+          <div id="timer">Tempo: 60s</div>
+          <div id="game-container">
+            <div id="blue" class="trash-bin" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div id="green" class="trash-bin" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div id="yellow" class="trash-bin" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div id="red" class="trash-bin" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div id="brown" class="trash-bin" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div id="orange" class="trash-bin" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <div id="gray" class="trash-bin" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+          </div>
+          <div id="trash-item" draggable="true" ondragstart="drag(event)"></div>
+          <div id="score">Pontuação: 0</div>
+          <div id="message"></div>
+          <button id="reset-btn" onclick="resetGame()">Reiniciar Jogo</button>
+        
+        <script>
+        const trashItems = [
+          {emoji: '📰', color: 'blue', name: 'papel'},
+          {emoji: '🍾', color: 'green', name: 'vidro'},
+          {emoji: '🥫', color: 'yellow', name: 'metal'},
+          {emoji: '🍎', color: 'brown', name: 'orgânico'},
+          {emoji: '📦', color: 'blue', name: 'papelão'},
+          {emoji: '🥤', color: 'red', name: 'plástico'},
+          {emoji: '💾', color: 'orange', name: 'eletrônico'},
+          {emoji: '🔋', color: 'orange', name: 'pilhas e baterias'},
+          {emoji: '💡', color: 'orange', name: 'lâmpadas'},
+          {emoji: '🧴', color: 'red', name: 'plástico'},
+          {emoji: '🍽️', color: 'gray', name: 'não reciclável'},
+          {emoji: '🧦', color: 'gray', name: 'não reciclável'},
+          {emoji: '🍖', color: 'brown', name: 'orgânico'},
+          { emoji: '📚', color: 'blue', name: 'livros' },
+          {emoji: '🧃', color: 'red', name: 'caixa de suco' },
+
+        ];
+        
+        let score = 0;
+        let currentItem;
+        let timeLeft = 60;
+        let timerInterval;
+        
+        function updateScore(points) {
+          score += points;
+          document.getElementById('score').textContent = `Pontuação: ${score}`;
+        }
+        
+        function showMessage(msg, isCorrect) {
+          const messageEl = document.getElementById('message');
+          messageEl.textContent = msg;
+          messageEl.style.color = isCorrect ? 'lightgreen' : 'red';
+          setTimeout(() => messageEl.textContent = '', 2000);
+        }
+        
+        function newTrashItem() {
+          currentItem = trashItems[Math.floor(Math.random() * trashItems.length)];
+          const trashItemEl = document.getElementById('trash-item');
+          trashItemEl.textContent = currentItem.emoji;
+          trashItemEl.setAttribute('data-color', currentItem.color);
+        }
+        
+        function allowDrop(ev) {
+          ev.preventDefault();
+        }
+        
+        function drag(ev) {
+          ev.dataTransfer.setData("text", ev.target.id);
+        }
+        
+        function drop(ev) {
+          ev.preventDefault();
+          const data = ev.dataTransfer.getData("text");
+          const draggedItem = document.getElementById(data);
+          const targetBin = ev.target.id;
+          
+          if (targetBin === draggedItem.getAttribute('data-color')) {
+            updateScore(10);
+            showMessage(`Correto! ${currentItem.emoji} é ${currentItem.name} e vai no lixo ${targetBin}.`, true);
+          } else {
+            updateScore(-5);
+            showMessage(`Ops! ${currentItem.emoji} não vai no lixo ${targetBin}.`, false);
+          }
+          
+          newTrashItem();
+        }
+        
+        function updateTimer() {
+          timeLeft--;
+          document.getElementById('timer').textContent = `Tempo: ${timeLeft}s`;
+          if (timeLeft <= 0) {
+            endGame();
+          }
+        }
+        
+        function startTimer() {
+          timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        function endGame() {
+          clearInterval(timerInterval);
+          document.getElementById('trash-item').style.display = 'none';
+          showMessage(`Fim de jogo! Sua pontuação final é ${score}.`, true);
+        }
+        
+        function resetGame() {
+          clearInterval(timerInterval);
+          score = 0;
+          timeLeft = 60;
+          updateScore(0);
+          document.getElementById('timer').textContent = `Tempo: ${timeLeft}s`;
+          document.getElementById('trash-item').style.display = 'block';
+          newTrashItem();
+          startTimer();
+        }
+        
+        newTrashItem();
+        startTimer();
+        </script>
+        
+        </body>
+        </html>
